@@ -88,4 +88,34 @@ public class SerialPortSettings {
     public void setPortTimeout(long portTimeout) {
         this.portTimeout = portTimeout;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SerialPortSettings)) return false;
+
+        SerialPortSettings that = (SerialPortSettings) o;
+
+        if (baudRate != that.baudRate) return false;
+        if (portTimeout != that.portTimeout) return false;
+        if (dataBits != that.dataBits) return false;
+        if (flowControl != that.flowControl) return false;
+        if (parity != that.parity) return false;
+        if (portName != null ? !portName.equals(that.portName) : that.portName != null) return false;
+        if (stopBits != that.stopBits) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dataBits != null ? dataBits.hashCode() : 0;
+        result = 31 * result + (flowControl != null ? flowControl.hashCode() : 0);
+        result = 31 * result + (parity != null ? parity.hashCode() : 0);
+        result = 31 * result + (stopBits != null ? stopBits.hashCode() : 0);
+        result = 31 * result + baudRate;
+        result = 31 * result + (portName != null ? portName.hashCode() : 0);
+        result = 31 * result + (int) (portTimeout ^ (portTimeout >>> 32));
+        return result;
+    }
 }

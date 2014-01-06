@@ -1,4 +1,4 @@
-package pl.awasiljew.spd.controller;
+package pl.awasiljew.spd.controller.listener;
 
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
@@ -56,12 +56,14 @@ public class ListenerSerialHandler implements SerialPortEventListener {
 
     private void readFromStream() throws IOException {
         int bytes = serialPort.getInputStream().read(buffer);
+        int count = 0;
         while (bytes > 0) {
+            count += bytes;
             streamBuffer.write(buffer, 0, bytes);
             bytes = serialPort.getInputStream().read(buffer);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Received " + bytes + " bytes data: [" + HexDecoder.getHexString(streamBuffer.toByteArray()) + "]");
+            log.debug("Received " + count + " bytes data: [" + HexDecoder.getHexString(streamBuffer.toByteArray()) + "]");
         }
     }
 

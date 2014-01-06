@@ -1,10 +1,13 @@
-package pl.awasiljew.spd.controller;
+package pl.awasiljew.spd.controller.impl;
 
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
 import org.apache.log4j.Logger;
+import pl.awasiljew.spd.controller.SerialPortController;
+import pl.awasiljew.spd.controller.io.SerialPortIOStream;
+import pl.awasiljew.spd.controller.listener.ListenerSerialHandler;
 import pl.awasiljew.spd.data.SerialRequest;
 import pl.awasiljew.spd.data.SerialResponse;
 import pl.awasiljew.spd.data.SerialResponseFactory;
@@ -20,7 +23,7 @@ import java.util.TooManyListenersException;
 /**
  * @author Adam Wasiljew
  */
-public abstract class BaseSerialPortController {
+public class BaseSerialPortController implements SerialPortController {
 
     private static final Logger log = Logger.getLogger(BaseSerialPortController.class);
     private SerialPortSettings serialPortSettings;
@@ -30,16 +33,18 @@ public abstract class BaseSerialPortController {
     private SerialResponseFactory serialResponseFactory;
     private SerialPortIOStream serialPortIOStream;
 
-    protected BaseSerialPortController(SerialPortSettings serialPortSettings, SerialPortInstanceFactory serialPortInstanceFactory, SerialResponseFactory serialResponseFactory) {
+    public BaseSerialPortController(SerialPortSettings serialPortSettings, SerialPortInstanceFactory serialPortInstanceFactory, SerialResponseFactory serialResponseFactory) {
         this.serialPortSettings = serialPortSettings;
         this.serialPortInstanceFactory = serialPortInstanceFactory;
         this.serialResponseFactory = serialResponseFactory;
     }
 
+    @Override
     public synchronized boolean isOpen() {
         return isOpen;
     }
 
+    @Override
     synchronized public SerialResponse send(SerialRequest req) throws PortClosedException, SendFrameException {
         if (isOpen) {
             try {
@@ -56,6 +61,7 @@ public abstract class BaseSerialPortController {
         }
     }
 
+    @Override
     synchronized public void sendAsync(SerialRequest req) throws PortClosedException, SendFrameException {
         if (isOpen) {
             try {
@@ -69,6 +75,7 @@ public abstract class BaseSerialPortController {
         }
     }
 
+    @Override
     synchronized public void close() {
         if (isOpen) {
             try {
@@ -100,6 +107,7 @@ public abstract class BaseSerialPortController {
         serialPort.notifyOnDataAvailable(true);
     }
 
+    @Override
     synchronized public void open() {
         if (!isOpen) {
             try {

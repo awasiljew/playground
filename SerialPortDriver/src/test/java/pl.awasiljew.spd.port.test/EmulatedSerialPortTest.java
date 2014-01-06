@@ -32,7 +32,7 @@ public class EmulatedSerialPortTest {
         setupDataWrittenListener();
     }
 
-    private void setupDataWrittenListener() {
+    private void  setupDataWrittenListener() {
         serialPort.addDataWrittenOutListener(new DataWriteListener() {
             @Override
             public void dataWritten() {

@@ -366,6 +366,12 @@ public class EmulatedSerialPort extends SerialPort {
         return os;
     }
 
+    @Override
+    public void close() {
+        // TODO: fix me
+        // Right now do nothing
+    }
+
     public void simulateDataReady(byte[] data) {
         try {
             serialReceiveStream.write(data);

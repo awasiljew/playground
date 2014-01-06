@@ -1,4 +1,4 @@
-package pl.awasiljew.spd.controller;
+package pl.awasiljew.spd.controller.io;
 
 import gnu.io.SerialPort;
 import org.apache.log4j.Logger;
@@ -34,6 +34,7 @@ public class SerialPortIOStream implements SerialDataConsumer {
         }
         serialPort.getOutputStream().write(req.getFrame());
         serialPort.getOutputStream().flush();
+        // TODO: check if returned null, which means that timeout occur
         return responseBlockingQueue.poll(portTimeoutInMs, TimeUnit.MILLISECONDS);
     }
 
