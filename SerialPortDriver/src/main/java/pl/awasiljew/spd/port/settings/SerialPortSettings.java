@@ -11,6 +11,7 @@ public class SerialPortSettings {
     private StopBits stopBits;
     private int baudRate;
     private String portName;
+    private long portTimeout;
 
     public SerialPortSettings(SerialPortSettings settings) {
         this.dataBits = settings.getDataBits();
@@ -19,15 +20,17 @@ public class SerialPortSettings {
         this.stopBits = settings.getStopBits();
         this.baudRate = settings.getBaudRate();
         this.portName = settings.getPortName();
+        this.portTimeout = settings.getPortTimeout();
     }
 
-    public SerialPortSettings(DataBits dataBits, FlowControl flowControl, Parity parity, StopBits stopBits, int baudRate, String portName) {
+    public SerialPortSettings(DataBits dataBits, FlowControl flowControl, Parity parity, StopBits stopBits, int baudRate, String portName, int portTimeout) {
         this.dataBits = dataBits;
         this.flowControl = flowControl;
         this.parity = parity;
         this.stopBits = stopBits;
         this.baudRate = baudRate;
         this.portName = portName;
+        this.portTimeout = portTimeout;
     }
 
     public DataBits getDataBits() {
@@ -76,5 +79,13 @@ public class SerialPortSettings {
 
     public void setPortName(String portName) {
         this.portName = portName;
+    }
+
+    public long getPortTimeout() {
+        return portTimeout;
+    }
+
+    public void setPortTimeout(long portTimeout) {
+        this.portTimeout = portTimeout;
     }
 }

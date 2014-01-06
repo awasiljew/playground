@@ -5,6 +5,4 @@ package pl.awasiljew.spd.data;
  */
 public interface SerialResponse {
 
-    void setFrame(byte[] frame);
-
 }
