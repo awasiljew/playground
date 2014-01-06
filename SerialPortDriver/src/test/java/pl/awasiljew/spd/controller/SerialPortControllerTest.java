@@ -17,7 +17,7 @@ import pl.awasiljew.spd.port.listener.DataWriteListener;
 import pl.awasiljew.spd.port.settings.*;
 import pl.awasiljew.spd.port.test.EmulatedSerialPort;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author Adam Wasiljew
@@ -58,7 +58,7 @@ public class SerialPortControllerTest {
     }
 
     @Test
-    public void shouldSendData() throws PortClosedException, SendFrameException {
+    public void shouldSendAndReceiveResponse() throws PortClosedException, SendFrameException {
         // Given
         TestSerialRequest request = new TestSerialRequest("Req1");
         expectedResponse = "Res";
@@ -68,8 +68,29 @@ public class SerialPortControllerTest {
         SerialResponse response = serialPortController.send(request);
         // Then
         assertNotNull(response);
+        assertTrue(response instanceof TestSerialResponse);
+        assertEquals(expectedResponse, ((TestSerialResponse) response).getText());
     }
 
+    @Test(expectedExceptions = PortClosedException.class)
+    public void shouldThrowExceptionWhenPortIsClosed() throws PortClosedException, SendFrameException {
+        // Given
+        TestSerialRequest request = new TestSerialRequest("Req1");
+        // When
+        serialPortController.send(request);
+        // Then - expected exception
+    }
+
+    @Test
+    public void shouldReturnNullResponseAfterTimeout() throws PortClosedException, SendFrameException {
+        // Given
+        TestSerialRequest request = new TestSerialRequest("Req1");
+        // When
+        serialPortController.open();
+        SerialResponse response = serialPortController.send(request);
+        // Then
+        assertNull(response);
+    }
 
     private void buildSerialResponseFactory() {
         serialResponseFactory = new SerialResponseFactory() {
@@ -98,7 +119,7 @@ public class SerialPortControllerTest {
                 StopBits.BITS_1,
                 19200,
                 "test",
-                5000);
+                200);
     }
 
     public class TestSerialRequest implements SerialRequest {
@@ -141,7 +162,7 @@ public class SerialPortControllerTest {
         });
     }
 
-    private void simulateDataResponse(final byte [] data, final long delay) {
+    private void simulateDataResponse(final byte[] data, final long delay) {
         new Thread(new Runnable() {
             @Override
             public void run() {
