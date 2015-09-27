@@ -4,14 +4,14 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
-import org.apache.log4j.Logger;
-import pl.awasiljew.spd.port.listener.DataWriteListener;
-import pl.awasiljew.spd.port.stream.ObservableByteArrayOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.TooManyListenersException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * <p>Test serial port</p>
@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
  */
 public class EmulatedSerialPort extends SerialPort {
 
-    private static Logger log = Logger.getLogger(EmulatedSerialPort.class);
+    private static Logger log = LoggerFactory.getLogger(EmulatedSerialPort.class);
     private static final int BUF_SIZE = 1024;
     private int baudRate;
     private int dataBits;
@@ -40,15 +40,29 @@ public class EmulatedSerialPort extends SerialPort {
     private boolean callOutHangup;
     private int inputBufferSize;
     private int outputBufferSize;
-    private ByteArrayOutputStream serialReceiveStream;
-    private ObservableByteArrayOutputStream os;
-    private ByteArrayInputStream is;
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private PipedInputStream pipedInputStream;
+    private PipedOutputStream pipedOutputStream;
 
     public EmulatedSerialPort() {
-        serialReceiveStream = new ByteArrayOutputStream(BUF_SIZE);
-        os = new ObservableByteArrayOutputStream(new ByteArrayOutputStream(BUF_SIZE));
-        is = new ByteArrayInputStream(new byte[BUF_SIZE]);
+        pipedOutputStream = new PipedOutputStream();
+        try {
+            pipedInputStream = new PipedInputStream(pipedOutputStream, BUF_SIZE) {
+                @Override
+                public int read(byte[] b) throws IOException {
+                    // This fixes piped input stream, to behave as serial port input stream.
+                    // When using serial port input stream, reading is performed until last
+                    // bytes are available. When all data was received, method does not block,
+                    // instead it returns 0, without filling out input byte array.
+                    if (available() > 0) {
+                        return super.read(b);
+                    }
+                    return 0;
+                }
+            };
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -358,12 +372,12 @@ public class EmulatedSerialPort extends SerialPort {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        return is;
+        return pipedInputStream;
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        return os;
+        return pipedOutputStream;
     }
 
     @Override
@@ -372,30 +386,20 @@ public class EmulatedSerialPort extends SerialPort {
         // Right now do nothing
     }
 
-    public void simulateDataReady(byte[] data) {
+    public Future<?> dataReady(byte[] data) {
         try {
-            serialReceiveStream.write(data);
-            is = new ByteArrayInputStream(serialReceiveStream.toByteArray());
+            pipedOutputStream.write(data);
             final SerialPort instance = this;
-            executorService.execute(new Runnable() {
+            return executorService.submit(new Runnable() {
                 @Override
                 public void run() {
                     listener.serialEvent(new SerialPortEvent(instance, SerialPortEvent.DATA_AVAILABLE, true, true));
                 }
             });
         } catch (IOException e) {
-            log.error(e, e);
+            log.error(e.getMessage(), e);
         }
-    }
-
-    public void addDataWrittenOutListener(DataWriteListener dataWriteListener) {
-        os.addListener(dataWriteListener);
-    }
-
-    public byte [] consumeWrittenData() {
-        byte [] writtenData = os.toByteArray();
-        os.reset();
-        return writtenData;
+        return null;
     }
 
 }

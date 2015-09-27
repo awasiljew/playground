@@ -3,7 +3,8 @@ package pl.awasiljew.spd.controller;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -13,14 +14,13 @@ import java.util.concurrent.*;
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Adam Wasiljew
  */
 public class MultithreadTestSupport {
 
-    private static Logger log = Logger.getLogger(MultithreadTestSupport.class);
+    private static Logger log = LoggerFactory.getLogger(MultithreadTestSupport.class);
     private List<SimpleConcurrentTask> concurrentTestTasks;
     private StringBuffer logData;
     private Integer count = 0;
@@ -59,7 +59,7 @@ public class MultithreadTestSupport {
             log("====== Phase END ======");
         }
         log.info("\n" + logData.toString());
-        for(List<Integer> integers : listOfResults) {
+        for (List<Integer> integers : listOfResults) {
             assertPermutations(integers, asList(1, 2, 3));
         }
     }
@@ -67,8 +67,8 @@ public class MultithreadTestSupport {
     private void assertPermutations(List<Integer> result, List<Integer> expected) {
         assertEquals(result.size(), expected.size());
         for (Integer i : expected) {
-            if(!result.contains(i)) {
-                assertFalse(true, "Not found expected "+expected+" in "+result);
+            if (!result.contains(i)) {
+                assertFalse(true, "Not found expected " + expected + " in " + result);
             }
         }
     }

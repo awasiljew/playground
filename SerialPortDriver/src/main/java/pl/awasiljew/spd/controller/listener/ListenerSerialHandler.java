@@ -3,8 +3,9 @@ package pl.awasiljew.spd.controller.listener;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-import org.apache.log4j.Logger;
-import pl.awasiljew.spd.data.SerialDataConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pl.awasiljew.spd.data.SerialDataReceiver;
 import pl.awasiljew.spd.utils.HexDecoder;
 
 import java.io.ByteArrayOutputStream;
@@ -12,19 +13,19 @@ import java.io.IOException;
 
 public class ListenerSerialHandler implements SerialPortEventListener {
 
-    private static final int BUF_LEN = 132;
+    protected static final int BUF_LEN = 132;
     private byte[] buffer;
     private ByteArrayOutputStream streamBuffer;
     private SerialPort serialPort;
-    private SerialDataConsumer serialDataConsumer;
-    private static final Logger log = Logger.getLogger(ListenerSerialHandler.class);
+    private SerialDataReceiver serialDataReceiver;
+    private static final Logger log = LoggerFactory.getLogger(ListenerSerialHandler.class);
 
-    public ListenerSerialHandler(SerialPort serialPort, SerialDataConsumer serialDataConsumer) {
+    public ListenerSerialHandler(SerialPort serialPort, SerialDataReceiver serialDataReceiver) {
         this.buffer = new byte[BUF_LEN];
         this.streamBuffer = new ByteArrayOutputStream();
         this.streamBuffer.reset();
         this.serialPort = serialPort;
-        this.serialDataConsumer = serialDataConsumer;
+        this.serialDataReceiver = serialDataReceiver;
     }
 
     @Override
@@ -45,7 +46,6 @@ public class ListenerSerialHandler implements SerialPortEventListener {
                         break;
                     case SerialPortEvent.DATA_AVAILABLE:
                         readFromStream();
-                        sendDataToConsumer();
                         break;
                 }
             } catch (IOException ex) {
@@ -55,25 +55,33 @@ public class ListenerSerialHandler implements SerialPortEventListener {
     }
 
     private void readFromStream() throws IOException {
-        int bytes = serialPort.getInputStream().read(buffer);
+        int bytes = readBytes();
         int count = 0;
         while (bytes > 0) {
             count += bytes;
-            streamBuffer.write(buffer, 0, bytes);
-            bytes = serialPort.getInputStream().read(buffer);
+            writeToStreamBuffer(bytes);
+            bytes = readBytes();
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Received " + count + " bytes data: [" + HexDecoder.getHexString(streamBuffer.toByteArray()) + "]");
+        if (count > 0) {
+            byte[] rawData = streamBuffer.toByteArray();
+            logRawData(count, rawData);
+            serialDataReceiver.receive(rawData);
+            streamBuffer.reset();
         }
     }
 
-    private void sendDataToConsumer() {
-        int received = serialDataConsumer.consume(streamBuffer.toByteArray());
-        if (received > 0) {
-            byte[] arr = streamBuffer.toByteArray();
-            streamBuffer.reset();
-            streamBuffer.write(arr, received, arr.length - received);
+    private void logRawData(int count, byte[] rawData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received " + count + " bytes data: [" + HexDecoder.getHexString(rawData) + "]");
         }
+    }
+
+    private void writeToStreamBuffer(int bytes) {
+        streamBuffer.write(buffer, 0, bytes);
+    }
+
+    private int readBytes() throws IOException {
+        return serialPort.getInputStream().read(buffer);
     }
 
 }

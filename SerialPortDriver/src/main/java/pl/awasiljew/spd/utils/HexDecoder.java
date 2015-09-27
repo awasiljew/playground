@@ -1,6 +1,7 @@
 package pl.awasiljew.spd.utils;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
@@ -15,7 +16,7 @@ public class HexDecoder {
     /**
      * Logger
      */
-    private static final Logger logger = Logger.getLogger(HexDecoder.class);
+    private static final Logger logger = LoggerFactory.getLogger(HexDecoder.class);
     private static final byte[] HEX_CHAR_TABLE = {
             (byte) '0', (byte) '1', (byte) '2', (byte) '3',
             (byte) '4', (byte) '5', (byte) '6', (byte) '7',

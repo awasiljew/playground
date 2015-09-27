@@ -3,8 +3,8 @@ package pl.awasiljew.spd.data;
 /**
  * @author Adam Wasiljew
  */
-public interface SerialRequest {
+public interface SerialDataReceiver {
 
-    byte[] getFrame();
+    void receive(byte[] data);
 
 }
