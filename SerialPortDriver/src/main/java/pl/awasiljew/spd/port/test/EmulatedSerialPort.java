@@ -43,6 +43,8 @@ public class EmulatedSerialPort extends SerialPort {
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
     private PipedInputStream pipedInputStream;
     private PipedOutputStream pipedOutputStream;
+    private OutputStream observableOutputStream;
+    private DataReceiver dataReceiver;
 
     public EmulatedSerialPort() {
         pipedOutputStream = new PipedOutputStream();
@@ -63,6 +65,16 @@ public class EmulatedSerialPort extends SerialPort {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        observableOutputStream = new ByteArrayOutputStream(BUF_SIZE) {
+            @Override
+            public void write(byte[] b) throws IOException {
+                if (dataReceiver != null) {
+                    dataReceiver.receive(b);
+                } else {
+                    super.write(b);
+                }
+            }
+        };
     }
 
     @Override
@@ -377,7 +389,7 @@ public class EmulatedSerialPort extends SerialPort {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        return pipedOutputStream;
+        return observableOutputStream;
     }
 
     @Override
@@ -400,6 +412,14 @@ public class EmulatedSerialPort extends SerialPort {
             log.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public interface DataReceiver {
+        void receive(byte[] data);
+    }
+
+    public void setDataReceiver(DataReceiver receiver) {
+        this.dataReceiver = receiver;
     }
 
 }
