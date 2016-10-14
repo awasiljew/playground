@@ -19,6 +19,7 @@ local.properties
 target/
 *.iml
 nbactions.xml
+.idea/
 
 # External tool builders
 .externalToolBuilders/
