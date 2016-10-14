@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?scenebuilder-stylesheet ../styles/Styles.css?>
+
+<AnchorPane id="AnchorPane" prefHeight="355.9999000000025" prefWidth="533.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.awasiljew.javafxtemplate.FXMLController">
+  <children>
+    <Button fx:id="button" layoutX="14.0" layoutY="14.0" onAction="#handleButtonAction" text="Click Me!" />
+    <Label fx:id="label" layoutX="92.0" layoutY="17.0" minHeight="16.0" minWidth="69.0" />
+    <ProgressBar fx:id="mainProgress" layoutX="14.0" layoutY="52.0" prefWidth="505.0" progress="0.0" />
+  </children>
+</AnchorPane>
