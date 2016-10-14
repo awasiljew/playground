@@ -15,6 +15,10 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.clover
+target/
+*.iml
+nbactions.xml
 
 # External tool builders
 .externalToolBuilders/

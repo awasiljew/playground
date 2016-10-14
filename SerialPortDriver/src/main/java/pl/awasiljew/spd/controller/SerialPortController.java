@@ -15,6 +15,8 @@ public interface SerialPortController {
 
     void sendAsync(ByteFrame req) throws PortClosedException, SendFrameException;
 
+    ByteFrame readLast() throws PortClosedException;
+
     void close();
 
     void open();

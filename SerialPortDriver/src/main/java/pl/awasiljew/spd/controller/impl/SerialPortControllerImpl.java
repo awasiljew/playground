@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.awasiljew.spd.controller.SerialPortController;
 import pl.awasiljew.spd.controller.listener.ListenerSerialHandler;
-import pl.awasiljew.spd.data.protocol.ByteFrame;
-import pl.awasiljew.spd.data.buffers.SerialDataFramesBuffer;
 import pl.awasiljew.spd.data.SerialDataReceiver;
+import pl.awasiljew.spd.data.buffers.SerialDataFramesBuffer;
+import pl.awasiljew.spd.data.protocol.ByteFrame;
 import pl.awasiljew.spd.exception.PortClosedException;
 import pl.awasiljew.spd.exception.SendFrameException;
 import pl.awasiljew.spd.exception.UnexpectedResponseException;
@@ -69,6 +69,15 @@ public class SerialPortControllerImpl implements SerialPortController {
             } catch (IOException e) {
                 throw new SendFrameException(e, req);
             }
+        } else {
+            throw new PortClosedException();
+        }
+    }
+
+    @Override
+    public ByteFrame readLast() throws PortClosedException {
+        if (isOpen) {
+            return framesBuffer.getLastFrame();
         } else {
             throw new PortClosedException();
         }
